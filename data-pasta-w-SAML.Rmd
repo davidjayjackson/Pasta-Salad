@@ -6,11 +6,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE,message = FALSE)
 library(ggplot2)
 library(scales)
 library(dplyr)
 library(tidyr)
+library(plotly)
 ```
 
 ### Samsara Luggage, Inc. (SAML) 
@@ -269,49 +270,38 @@ df_1 <- tibble::tribble(
 
 ```
 
-```{r}
-df_2 <- tibble::tribble(
-           ~Date,   ~Open,   ~High,   ~Low,   ~Close,   ~Adj.Close,     ~Volume,
-  "Jun 09, 2020", 25.17, 25.17, 25.17, 25.17, 25.17,     NA,
-  "Jun 08, 2020", 27.97, 27.97,  16.5, 25.17, 25.17, 1,067,
-  "Jun 05, 2020", 17.83, 30.77, 17.83, 30.77, 30.77,   145,
-  "Jun 04, 2020", 18.88, 20.98, 18.88, 20.98, 20.98,    14,
-  "Jun 03, 2020", 18.18, 20.98, 16.78, 16.78, 16.78,   179,
-  "Jun 02, 2020", 17.13, 17.13, 16.08, 16.08, 16.08,    29,
-  "Jun 01, 2020", 16.78, 18.18, 16.78, 18.18, 18.18,    50,
-  "May 29, 2020", 16.43, 17.48, 15.38, 15.38, 15.38,    38,
-  "May 28, 2020", 18.88, 18.95, 14.69, 15.38, 15.38,    41,
-  "May 27, 2020", 15.38, 15.38, 15.38, 15.38, 15.38,    14,
-  "May 26, 2020", 16.78, 16.78, 16.78, 16.78, 16.78,     NA,
-  "May 22, 2020", 16.78, 16.78, 15.31, 16.78, 16.78,     8
-  )
-
-
-```
-
 ### Combine Three DF
 
 ```{r}
 colnames(df) <- c("Date","Open","High","Low", "Close", "Adj.Close","Volume")
 colnames(df_1) <- c("Date","Open","High","Low", "Close", "Adj.Close","Volume")
-colnames(df_2) <- c("Date","Open","High","Low", "Close", "Adj.Close","Volume")
+#colnames(df_2) <- c("Date","Open","High","Low", "Close", "Adj.Close","Volume")
 
-stock <- rbind(df,df_1,df_2)
+stock <- rbind(df,df_1)
 stock$Date <- lubridate::mdy(stock$Date)
 stock$Volume <- as.numeric(stock$Volume)
 ```
 
 ### Plot Daily Volume
 
-```{r}
-ggplot(stock) + geom_line(aes(x=Date,y=Volume)) +
-  scale_y_continuous(labels = comma) + ylim(0, 150000)  
+```{r} 
+plot1 <- ggplot(stock) + geom_line(aes(x=Date,y=Volume)) +
+  scale_y_continuous(labels = comma,limits=c(0,125000) ) +
+  labs(title = "SAML Stock: Daily Volume: July 2020 - May 21, 2021",
+       caption ="Source: Yahoo Finance")
+
+ggplotly(plot1)
 ```
 
 ### Plot Open, High and Close
 
 ```{r}
-ggplot(stock) + geom_line(aes(x=Date,y=Close)) +
-  geom_errorbar(data =stock,aes(ymin=Low,ymax=High))
+plot2 <- ggplot(stock) + geom_line(aes(x=Date,y=Close,col="Close")) +
+                geom_line(aes(x=Date,y=High,col="High")) +
+                geom_line(aes(x=Date,y=Low,col="Low")) + 
+            labs(title = "SAML Stock Price: Jul 2020 - May 21, 2021",
+                 caption = "Source: Yahoo Finance")
+ggplotly(plot2)
 ```
+
 
