@@ -12,6 +12,8 @@ library(scales)
 library(dplyr)
 library(tidyr)
 library(plotly)
+library(TTR)
+library(xts)
 ```
 
 ### Samsara Luggage, Inc. (SAML) 
@@ -282,6 +284,13 @@ stock$Date <- lubridate::mdy(stock$Date)
 stock$Volume <- as.numeric(stock$Volume)
 ```
 
+### Discriptive Stats
+
+```{r}
+stock %>% skimr::skim() 
+```
+
+
 ### Plot Daily Volume
 
 ```{r} 
@@ -303,5 +312,14 @@ plot2 <- ggplot(stock) + geom_line(aes(x=Date,y=Close,col="Close")) +
                  caption = "Source: Yahoo Finance")
 ggplotly(plot2)
 ```
+
+#### Ribbon Plot
+
+```{r}
+ggplot(stock) + geom_line(aes(x=Date,y=Close,col="Close")) +
+  geom_ribbon(data=stock,aes(ymin = Low,ymax = High))
+```
+
+
 
 
