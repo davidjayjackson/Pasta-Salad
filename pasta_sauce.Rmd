@@ -1,0 +1,139 @@
+---
+title: "That's a Spicy Sauce"
+author: "David Jackson"
+date: "5/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(scales)
+```
+
+### Demo of Data Pasta: Using Florida Census Data 
+
+```{r}
+rm(list=ls())
+
+FL <- tibble::tribble(
+                  ~Age,       ~Population,  ~Percent,
+      "Under 5 years",    945823,  5.9,
+       "5 to 9 years",   1031718,  6.5,
+     "10 to 14 years",   1057024,  6.6,
+     "15 to 19 years",   1014067,  6.3,
+     "20 to 24 years",    928310,  5.8,
+     "25 to 34 years",   2084100,   13,
+     "35 to 44 years",   2485247, 15.5,
+     "45 to 54 years",   2069479, 12.9,
+     "55 to 59 years",    821517,  5.1,
+     "60 to 64 years",    737496,  4.6,
+     "65 to 74 years",   1452176,  9.1,
+     "75 to 84 years",   1024134,  6.4,
+  "85 years and over",    331287,  2.1
+  )
+```
+```{r}
+##  Pull First Age.
+FL$Year <- readr::parse_number(FL$Age)
+summary(FL)
+```
+
+### Plot by Age Group
+
+```{r}
+
+
+ggplot(FL) + geom_col(aes(x=reorder(Age,Population),y=Population)) +
+  scale_y_continuous(labels =  comma) +
+  theme(axis.text.x = element_text(angle = 45))
+
+FL$Year <- as.factor(FL$Year)
+ggplot(FL) + geom_col(aes(x=Year,y=Population)) +
+  scale_y_continuous(labels =  comma) +
+  labs(title = "Population by Age",x="Age in Years",y="Population",
+       caption = "Source: https://www.infoplease.com/")
+```
+
+### Age Group Population as a Percent of Total 
+
+```{r}
+FL$Rate <- FL$Percent/100
+ggplot(FL) + geom_col(aes(x=reorder(Age, Rate),y=Rate)) +
+  scale_y_continuous(labels =  percent) +
+  theme(axis.text.x = element_text(angle = 45)) + 
+  labs(title = "Population by Age and Percent",x="Age in Years",y="By Percent by Age",
+       caption = "Source: https://www.infoplease.com/")
+```
+
+### Cost of Living for Various Cities
+
+```{r}
+cost_of_livng <- tibble::tribble(
+                     ~Urban.Area, ~`100%.Composite.Index`, ~`13.%.Grocery.Items`, ~`29.%.Housing`, ~`10%.Utilities`, ~`12.%.Transportation`, ~`4%.Health.Care`, ~`32.%.Miscellaneous.Goods.and.Services`,
+  "Anniston-Calhoun, County, AL",                    91.2,                 101.2,            74.8,            111.2,                   88.8,              89.3,                                     96.6,
+                      "Akron OH",                   100.2,                 105.1,            99.7,            107.9,                  107.1,              86.8,                                       96,
+                    "Albany, GA",                    90.1,                 108.7,            74.8,               82,                   96.6,              89.8,                                     96.8,
+                    "Albany, NY",                   108.1,                   105,           112.6,              101,                  102.8,             111.7,                                    108.6,
+                "Alexandria, LA",                    95.1,                    96,            92.7,             89.9,                   97.2,              92.9,                                     98.2,
+                  "Amarillo, TX",                    89.5,                  89.9,            89.4,             80.4,                   92.1,              95.2,                                     90.8,
+                  "Americus, GA",                    88.3,                 105.5,              71,             88.2,                   99.8,             103.7,                                     91.3,
+                      "Ames, IA",                    96.8,                  93.7,           104.8,             82.3,                  101.8,              98.4,                                     93.7,
+                 "Anchorage, AK",                   128.4,                 134.5,           142.9,             94.1,                    122,             135.7,                                    124.8,
+                  "Anderson, SC",                    91.8,                 103.4,              77,            101.6,                   92.3,              99.7,                                     95.9,
+                  "Appleton, WI",                    93.3,                    93,            81.8,            102.3,                  104.4,             104.7,                                       96,
+                   "Ardmore, OK",                    87.3,                  92.9,            77.3,             84.8,                  101.3,              93.7,                                     89.8,
+                 "Arlington, TX",                    99.3,                  94.4,            89.4,            109.9,                   98.3,             105.4,                                    106.4,
+                 "Asheville, NC",                   101.1,                 104.6,            97.8,            113.1,                   94.2,             104.7,                                    100.6,
+                   "Ashland, OH",                    88.5,                 100.7,            72.1,             92.1,                   98.2,              88.8,                                     94.2,
+                   "Atlanta, GA",                    95.6,                  96.2,            90.7,             86.3,                   99.3,             103.3,                                    100.3,
+            "Auburn-Opelika, AL",                    98.9,                 104.6,            90.2,            101.3,                   92.9,              88.4,                                    106.5,
+          "Augusta-Aiken, GA-SC",                    93.2,                   106,            79.4,             92.1,                   93.9,             101.4,                                     99.4,
+                    "Austin, TX",                    95.5,                  89.3,            85.1,            110.7,                  100.2,             100.3,                                    100.4,
+               "Bakersfield, CA",                   103.4,                 107.6,            98.4,            104.3,                  111.3,             107.2,                                    103.1,
+                 "Baltimore, MD",                   119.4,                 110.8,           155.4,            112.5,                  105.3,              97.9,                                      100,
+              "Baton, Rouge, LA",                    96.1,                 100.4,           102.2,             78.2,                   90.4,              97.7,                                     95.8,
+                  "Beaufort, SC",                   105.2,                 106.9,           103.5,            114.3,                   99.6,              95.7,                                      106,
+                  "Beaumont, TX",                    95.7,                  87.1,            95.9,             92.5,                  100.4,              98.7,                                     98.1,
+                "Bellingham, WA",                     113,                 114.9,           135.9,             83.8,                  113.2,             115.3,                                    100.8,
+            "Bergen-Passaic, NJ",                   131.3,                 112.1,             174,            128.9,                  102.4,             106.3,                                    113.8
+  )
+
+```
+
+###3# Summary Stats
+
+```{r}
+cost_of_livng <- janitor::clean_names(cost_of_livng)
+summary(cost_of_livng)
+```
+
+```{r}
+
+
+ggplot(cost_of_livng) + geom_col(aes(x=reorder(urban_area,x100_percent_composite_index),
+   y=x100_percent_composite_index)) +
+  scale_y_continuous(labels =  comma) +
+  theme(axis.text.x = element_text(angle = 45)) + coord_flip() +
+  labs(title="x100_percent_composite_index")
+
+```
+```{r}
+
+ggplot(cost_of_livng) + geom_col(aes(x=urban_area,y=x29_percent_housing)) +
+  scale_y_continuous(labels =  comma) +
+  labs(title = "Cost of Living: Housing",x="Urban Area",y="Housing",
+       caption = "Source: https://www.infoplease.com/") + coord_flip()
+```
+```
+
+#### Create and Pivot Longer Table and Plot
+
+
+``{r}
+
+```
+
+
